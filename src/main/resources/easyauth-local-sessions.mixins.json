@@ -1,14 +1,15 @@
 {
-	"required": true,
-	"package": "lol.demovio.easyauthlocalsessions.mixin",
-	"compatibilityLevel": "JAVA_17",
-	"mixins": [
-		"AuthEventHandlerClientMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"overwrites": {
-		"requireAnnotations": true
-	}
+  "required": true,
+  "package": "lol.demovio.easyauthlocalsessions.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "AuthEventHandlerMixin",
+    "RegisterCommandMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
 }

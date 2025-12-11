@@ -1,7 +1,12 @@
 package lol.demovio.easyauthlocalsessions;
 
-import java.util.Arrays;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
+
+import java.security.SecureRandom;
+import java.util.Arrays;
 
 public class EasyAuthLocalSessionsServerManager {
     public static void handleResponseAuthToken(ServerPlayerEntity player, byte[] authToken) {
@@ -17,8 +22,15 @@ public class EasyAuthLocalSessionsServerManager {
 
     public static byte[] generateAuthToken(ServerPlayerEntity player) {
         byte[] token = new byte[32];
-        new java.security.SecureRandom().nextBytes(token);
-        // TODO: write
+        new SecureRandom().nextBytes(token);
+        // TODO: write to encrypted db (key = hashed token, value = player since player can have multiple tokens)
         return token;
+    }
+
+    public static void sendAuthToken(ServerPlayerEntity player) {
+        PacketByteBuf payload = PacketByteBufs.create();
+        byte[] token = EasyAuthLocalSessionsServerManager.generateAuthToken(player);
+        payload.writeByteArray(token);
+        ServerPlayNetworking.send(player, EasyAuthLocalSessionsNetwork.CACHE_AUTH_TOKEN_PACKET_ID, payload);
     }
 }

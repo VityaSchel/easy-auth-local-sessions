@@ -11,15 +11,15 @@ public class EasyAuthLocalSessionsNetwork {
     public static void initialize() {
         ServerPlayNetworking.registerGlobalReceiver(
                 RESPONSE_AUTH_TOKEN_PACKET_ID,
-            (server, player, handler, buf, responseSender) -> {
-                byte[] authToken = buf.readByteArray();
-                server.execute(() -> {
-                    if (player == null) {
-                        return;
-                    }
-                    EasyAuthLocalSessionsServerManager.handleResponseAuthToken(player, authToken);
-                });
-            }
+                (server, player, handler, buf, responseSender) -> {
+                    byte[] authToken = buf.readByteArray();
+                    server.execute(() -> {
+                        if (player == null) {
+                            return;
+                        }
+                        EasyAuthLocalSessionsServerManager.handleResponseAuthToken(player, authToken);
+                    });
+                }
         );
     }
 }
