@@ -1,0 +1,41 @@
+{
+	"schemaVersion": 1,
+	"id": "easyauth-local-sessions",
+	"version": "${version}",
+	"name": "EasyAuth local sessions",
+	"description": "Mixin-patch Fabric mod that adds local sessions support to EasyAuth",
+	"authors": [
+		"VityaSchel"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "MIT",
+	"icon": "assets/easyauth-local-sessions/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"lol.demovio.easyauthlocalsessions.EasyAuthLocalSessions"
+		],
+		"client": [
+			"lol.demovio.easyauthlocalsessions.EasyAuthLocalSessionsClient"
+		]
+	},
+	"mixins": [
+		"easyauth-local-sessions.mixins.json",
+		{
+			"config": "easyauth-local-sessions.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.18.2",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"easy-auth": ">=3.2.1"
+	}
+}
