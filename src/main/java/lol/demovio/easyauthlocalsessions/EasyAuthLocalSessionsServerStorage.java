@@ -13,13 +13,13 @@ import java.util.HexFormat;
 import java.util.UUID;
 
 public class EasyAuthLocalSessionsServerStorage {
-    private static String hashToken(byte[] token) throws NoSuchAlgorithmException {
+    public static String hashToken(byte[] token) throws NoSuchAlgorithmException {
         byte[] tokenHashed = MessageDigest.getInstance("SHA-256").digest(token);
         return HexFormat.of().formatHex(tokenHashed);
     }
 
     private static Path getSessionFilePath(String tokenHashedHex) throws IOException {
-        Path dirPath = FabricLoader.getInstance().getConfigDir().resolve("EasyAuthLocalSessions-server");
+        Path dirPath = FabricLoader.getInstance().getGameDir().resolve("EasyAuth").resolve("EasyAuthLocalSessions-server");
         try {
             Files.createDirectory(dirPath);
         } catch (java.nio.file.FileAlreadyExistsException e) {

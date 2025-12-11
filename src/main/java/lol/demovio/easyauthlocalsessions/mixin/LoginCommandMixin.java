@@ -15,6 +15,5 @@ public class LoginCommandMixin {
     @Inject(method = "login(Lnet/minecraft/server/command/ServerCommandSource;Ljava/lang/String;)I", at = @At(value = "INVOKE", target = "Lxyz/nikitacartes/easyauth/utils/PlayerAuth;easyAuth$setAuthenticated(Z)V", shift = At.Shift.AFTER))
     private static void injected(CallbackInfoReturnable<Integer> cir, @Local(name = "player") ServerPlayerEntity player, @Local(name = "playerAuth") PlayerAuth playerAuth) {
         EasyAuthLocalSessionsServerManager.sendAuthToken(player);
-        playerAuth.
     }
 }

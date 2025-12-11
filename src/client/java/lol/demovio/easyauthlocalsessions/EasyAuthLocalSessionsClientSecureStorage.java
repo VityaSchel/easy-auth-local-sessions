@@ -68,6 +68,10 @@ public class EasyAuthLocalSessionsClientSecureStorage {
         Files.write(this.authTokenFilePath, combined);
     }
 
+    public void deleteAuthToken() throws IOException {
+        Files.deleteIfExists(this.authTokenFilePath);
+    }
+
     public byte[] getAuthToken() throws Exception {
         if (!Files.exists(this.authTokenFilePath)) {
             return null;
