@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.UUID;
 
@@ -33,7 +32,7 @@ public class EasyAuthLocalSessionsClientSecureStorage {
         String sessionFilePathName = playerUuid.toString() + " " + serverAddress;
         byte[] sessionFilePathNameHashed = MessageDigest.getInstance("SHA-256").digest(sessionFilePathName.getBytes());
         String sessionFilePathNameHashedHex = HexFormat.of().formatHex(sessionFilePathNameHashed);
-        Path dirPath = FabricLoader.getInstance().getConfigDir().resolve("EasyAuthLocalSessions");
+        Path dirPath = FabricLoader.getInstance().getConfigDir().resolve("EasyAuthLocalSessions-client");
         try {
             Files.createDirectory(dirPath);
         } catch (java.nio.file.FileAlreadyExistsException e) {
@@ -67,7 +66,6 @@ public class EasyAuthLocalSessionsClientSecureStorage {
         System.arraycopy(encrypted, 0, combined, iv.length, encrypted.length);
 
         Files.write(this.authTokenFilePath, combined);
-        EasyAuthLocalSessions.LOGGER.info("Wrote {}", Arrays.toString(combined));
     }
 
     public byte[] getAuthToken() throws Exception {
@@ -86,8 +84,6 @@ public class EasyAuthLocalSessionsClientSecureStorage {
         GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
         cipher.init(Cipher.DECRYPT_MODE, this.secretKey, spec);
 
-        byte[] token = cipher.doFinal(encrypted);
-        EasyAuthLocalSessions.LOGGER.info("Read {}", Arrays.toString(token));
-        return token;
+        return cipher.doFinal(encrypted);
     }
 }
