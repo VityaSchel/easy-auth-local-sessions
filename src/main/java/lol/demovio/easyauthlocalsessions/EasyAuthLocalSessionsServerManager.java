@@ -9,7 +9,7 @@ public class EasyAuthLocalSessionsServerManager {
             if (authToken.length != 32) {
                 return;
             }
-            EasyAuthLocalSessions.LOGGER.info(player.getUuid() + " " + Arrays.toString(authToken));
+            EasyAuthLocalSessions.LOGGER.info("TODO: validate and verify {} {}", player.getUuid(), Arrays.toString(authToken));
         } catch (Exception e) {
             EasyAuthLocalSessions.LOGGER.error("Error while handling authorization token received from client", e);
         }

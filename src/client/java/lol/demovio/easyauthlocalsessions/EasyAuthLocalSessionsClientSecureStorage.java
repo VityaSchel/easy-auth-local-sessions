@@ -9,34 +9,45 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.UUID;
 
 public class EasyAuthLocalSessionsClientSecureStorage {
     private static final String ALGORITHM = "AES/GCM/NoPadding";
     private static final int GCM_IV_LENGTH = 12;
     private static final int GCM_TAG_LENGTH = 128;
 
-    private static Path getSecretFile() {
-        return FabricLoader.getInstance().getConfigDir().resolve("EasyAuthLocalSessions");
-    }
-
-    private static SecretKey deriveKey() throws Exception {
-        String machineId = "TODO: change derivation";
+    private static SecretKey deriveKey(UUID playerUuid, String serverAddress) throws Exception {
+        String derivedKeyString = playerUuid.toString() + " " + serverAddress;
 
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] keyBytes = digest.digest(machineId.getBytes());
-        return new SecretKeySpec(keyBytes, "AES");
+        byte[] derivedKeyBytes = digest.digest(derivedKeyString.getBytes());
+        return new SecretKeySpec(derivedKeyBytes, "AES");
     }
 
-    public static void saveSecret(byte[] secret) throws Exception {
-        SecretKey key = deriveKey();
+    private static Path getSessionFilePath(UUID playerUuid, String serverAddress) throws NoSuchAlgorithmException {
+        String sessionFilePathName = playerUuid.toString() + " " + serverAddress;
+        String sessionFilePathNameHashed = new String(MessageDigest.getInstance("SHA-256").digest(sessionFilePathName.getBytes()));
+        return FabricLoader.getInstance().getConfigDir().resolve("EasyAuthLocalSessions/" + sessionFilePathNameHashed);
+    }
+
+    private final SecretKey secretKey;
+    private final Path authTokenFilePath;
+    public EasyAuthLocalSessionsClientSecureStorage(UUID playerUuid, String serverAddress) throws Exception {
+        this.secretKey = EasyAuthLocalSessionsClientSecureStorage.deriveKey(playerUuid, serverAddress);
+        this.authTokenFilePath = EasyAuthLocalSessionsClientSecureStorage.getSessionFilePath(playerUuid, serverAddress);
+    }
+
+
+    public void saveAuthToken(byte[] secret) throws Exception {
         Cipher cipher = Cipher.getInstance(ALGORITHM);
 
         byte[] iv = new byte[GCM_IV_LENGTH];
         new SecureRandom().nextBytes(iv);
 
         GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
-        cipher.init(Cipher.ENCRYPT_MODE, key, spec);
+        cipher.init(Cipher.ENCRYPT_MODE, this.secretKey, spec);
 
         byte[] encrypted = cipher.doFinal(secret);
 
@@ -44,25 +55,24 @@ public class EasyAuthLocalSessionsClientSecureStorage {
         System.arraycopy(iv, 0, combined, 0, iv.length);
         System.arraycopy(encrypted, 0, combined, iv.length, encrypted.length);
 
-        Files.write(getSecretFile(), combined);
+        Files.write(this.authTokenFilePath, combined);
     }
 
-    public static byte[] loadSecret() throws Exception {
-        if (!Files.exists(getSecretFile())) {
+    public byte[] getAuthToken() throws Exception {
+        if (!Files.exists(this.authTokenFilePath)) {
             return null;
         }
 
-        byte[] combined = Files.readAllBytes(getSecretFile());
+        byte[] combined = Files.readAllBytes(this.authTokenFilePath);
 
         byte[] iv = new byte[GCM_IV_LENGTH];
         byte[] encrypted = new byte[combined.length - GCM_IV_LENGTH];
         System.arraycopy(combined, 0, iv, 0, iv.length);
         System.arraycopy(combined, iv.length, encrypted, 0, encrypted.length);
 
-        SecretKey key = deriveKey();
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         GCMParameterSpec spec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
-        cipher.init(Cipher.DECRYPT_MODE, key, spec);
+        cipher.init(Cipher.DECRYPT_MODE, this.secretKey, spec);
 
         return cipher.doFinal(encrypted);
     }
