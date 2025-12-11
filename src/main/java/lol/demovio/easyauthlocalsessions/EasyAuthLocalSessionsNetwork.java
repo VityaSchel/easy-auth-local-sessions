@@ -10,7 +10,8 @@ public class EasyAuthLocalSessionsNetwork {
     public static final Identifier RESPONSE_AUTH_TOKEN_PACKET_ID = new Identifier("easy_auth", "response_auth_token");
 
     public static void initialize() {
-        ServerPlayNetworking.registerGlobalReceiver(RESPONSE_AUTH_TOKEN_PACKET_ID,
+        ServerPlayNetworking.registerGlobalReceiver(
+            RESPONSE_AUTH_TOKEN_PACKET_ID,
             (server, player, handler, buf, responseSender) -> {
                 byte[] authToken = buf.readByteArray();
                 server.execute(() -> {
@@ -19,6 +20,7 @@ public class EasyAuthLocalSessionsNetwork {
                     }
                     EasyAuthLocalSessionsServerManager.handleResponseAuthToken(player, authToken);
                 });
-            });
+            }
+        );
     }
 }
