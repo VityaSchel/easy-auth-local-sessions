@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.HexFormat;
 import java.util.UUID;
 
@@ -18,8 +19,9 @@ public class EasyAuthLocalSessionsServerStorage {
         return HexFormat.of().formatHex(tokenHashed);
     }
 
+    static final Path dirPath = FabricLoader.getInstance().getGameDir().resolve("EasyAuth").resolve("EasyAuthLocalSessions-server");
+
     private static Path getSessionFilePath(String tokenHashedHex) throws IOException {
-        Path dirPath = FabricLoader.getInstance().getGameDir().resolve("EasyAuth").resolve("EasyAuthLocalSessions-server");
         try {
             Files.createDirectory(dirPath);
         } catch (java.nio.file.FileAlreadyExistsException e) {
@@ -43,9 +45,33 @@ public class EasyAuthLocalSessionsServerStorage {
         }
     }
 
-    public static void deleteAuthorizationToken(String tokenHash) throws IOException {
-        Path sessionFilePath = getSessionFilePath(tokenHash);
-        Files.deleteIfExists(sessionFilePath);
+    public static void deleteAuthorizationToken(String tokenHash) {
+        try {
+            Path sessionFilePath = getSessionFilePath(tokenHash);
+            Files.deleteIfExists(sessionFilePath);
+        } catch (IOException e) {
+            EasyAuthLocalSessions.LOGGER.error("Couldn't delete authorization token session file", e);
+        }
+    }
+
+    public static void deleteAuthorizationTokens(UUID targetUuid) {
+        try {
+            byte[] targetBytes = UuidUtils.asBytes(targetUuid);
+            try (var paths = Files.list(dirPath)) {
+                paths.forEach(path -> {
+                    try {
+                        byte[] content = Files.readAllBytes(path);
+                        if (Arrays.equals(content, targetBytes)) {
+                            Files.deleteIfExists(path);
+                        }
+                    } catch (IOException e) {
+                        EasyAuthLocalSessions.LOGGER.error("Couldn't delete authorization token session file", e);
+                    }
+                });
+            }
+        } catch (Exception e) {
+            EasyAuthLocalSessions.LOGGER.error("Couldn't delete authorization tokens", e);
+        }
     }
 
     private static class UuidUtils {

@@ -3,6 +3,8 @@
   "package": "lol.demovio.easyauthlocalsessions.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "AccountCommandMixin",
+    "AuthCommandMixin",
     "AuthEventHandlerMixin",
     "LoginCommandMixin",
     "LogoutCommandMixin",

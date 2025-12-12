@@ -64,24 +64,29 @@ public class EasyAuthLocalSessionsServerManager {
         }
     }
 
-    public static void revokeAuthToken(ServerPlayerEntity player) {
-        EasyAuthLocalSessionsPlayerAuth playerAuth = (EasyAuthLocalSessionsPlayerAuth) player;
-        EasyAuthLocalSessionsPlayerAuthData authData = playerAuth.easyAuthLocalSessions$getAuthData();
-        if (authData != null && authData.authorizationTokenHash != null) {
-            try {
-                EasyAuthLocalSessionsServerStorage.deleteAuthorizationToken(authData.authorizationTokenHash);
-            } catch (IOException e) {
-                EasyAuthLocalSessions.LOGGER.error("Couldn't revoke authorization token", e);
-            }
-            PacketByteBuf payload = PacketByteBufs.create();
-            payload.writeUuid(player.getUuid());
-            ServerPlayNetworking.send(player, EasyAuthLocalSessionsNetwork.DELETE_AUTH_TOKEN_PACKET_ID, payload);
-        }
-    }
-
     public static void saveAuthWith(ServerPlayerEntity player, byte[] token) throws NoSuchAlgorithmException {
         EasyAuthLocalSessionsPlayerAuth playerAuth = (EasyAuthLocalSessionsPlayerAuth) player;
         String tokenHash = EasyAuthLocalSessionsServerStorage.hashToken(token);
         playerAuth.easyAuthLocalSessions$setAuthData(new EasyAuthLocalSessionsPlayerAuthData(tokenHash));
+    }
+
+    public static void revokeAuthToken(ServerPlayerEntity player) {
+        EasyAuthLocalSessionsPlayerAuth playerAuth = (EasyAuthLocalSessionsPlayerAuth) player;
+        EasyAuthLocalSessionsPlayerAuthData authData = playerAuth.easyAuthLocalSessions$getAuthData();
+        if (authData != null && authData.authorizationTokenHash != null) {
+            EasyAuthLocalSessionsServerStorage.deleteAuthorizationToken(authData.authorizationTokenHash);
+            sendDeleteAuthTokenPacket(player);
+        }
+    }
+
+    public static void revokeAllAuthTokens(ServerPlayerEntity player) {
+        EasyAuthLocalSessionsServerStorage.deleteAuthorizationTokens(player.getUuid());
+        sendDeleteAuthTokenPacket(player);
+    }
+
+    private static void sendDeleteAuthTokenPacket(ServerPlayerEntity player) {
+        PacketByteBuf payload = PacketByteBufs.create();
+        payload.writeUuid(player.getUuid());
+        ServerPlayNetworking.send(player, EasyAuthLocalSessionsNetwork.DELETE_AUTH_TOKEN_PACKET_ID, payload);
     }
 }
