@@ -1,8 +1,6 @@
 # EasyAuth — Local Sessions
 
-A Minecraft 1.20.1 Fabric patching (mixin) mod that adds locally stored sessions for automatic authorization in EasyAuth
-by NikitaCartes
-mod to provide seamless login without password for offline players.
+A Minecraft 1.20.1 Fabric patching (mixin) mod that adds locally stored sessions for automatic authorization in EasyAuth by NikitaCartes mod to provide seamless login without password for offline players.
 
 ## Features
 
@@ -54,3 +52,11 @@ Important caveats:
   versa, if someone hosts a server under the same domain or IP address, the mod will send the authorization token to it,
   which can then be used in replay attacks.
   See [issue #2](https://git.hloth.dev/demovio/easy-auth-local-sessions/issues/2)
+
+## License
+
+[MIT](./LICENSE)
+
+## Donate
+
+[hloth.dev/donate](https://hloth.dev/donate)
